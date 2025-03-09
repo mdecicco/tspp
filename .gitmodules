@@ -1,0 +1,6 @@
+[submodule "deps/bind"]
+	path = deps/bind
+	url = https://github.com/tsn-lang/bind.git
+[submodule "test/Catch2"]
+	path = test/Catch2
+	url = https://github.com/catchorg/Catch2.git

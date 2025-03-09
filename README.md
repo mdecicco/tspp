@@ -21,6 +21,10 @@ I liked how it felt and worked so much though that I wanted to do it again but b
 it into other projects without much thought.
 
 
+### Danger
+This is very much a WIP
+
+
 ### Okay, but how does it work?
 Like this, currently
 ```c++
@@ -61,7 +65,8 @@ int main() {
         auto tp = mod->type<SomeObject>("SomeObject");
         tp.ctor();
         tp.ctor<i32>();
-        tp.dtor();
+        tp.dtor();  // Destructor should be called either when the JS object is GC'd or the program
+                    // terminates (untested)
         tp.prop("a", &SomeObject::a);
         tp.method("print", &SomeObject::print);
     

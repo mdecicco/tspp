@@ -1,7 +1,6 @@
 build
 bin
-lib
-*.lib
+/lib
 *.dll
 *.exe
 *.pdb

@@ -7,12 +7,11 @@
 
 #include <memory>
 
+#include "v8-context.h"       // NOLINT(build/include_directory)
 #include "v8-internal.h"      // NOLINT(build/include_directory)
 #include "v8-local-handle.h"  // NOLINT(build/include_directory)
 
 namespace v8 {
-
-class Context;
 
 namespace internal {
 class EmbedderState;

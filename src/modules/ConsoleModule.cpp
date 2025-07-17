@@ -112,6 +112,10 @@ namespace tspp {
                 break;
             case v8::Isolate::kMessageError:
                 logError("%s", messageStr.c_str());
+                if (stackTrace) {
+                    String stackTraceStr = stringViewToString(stackTrace->toString()->string());
+                    logError("%s", stackTraceStr.c_str());
+                }
                 break;
             default:
                 logInfo("%s", messageStr.c_str());

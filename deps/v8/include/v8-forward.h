@@ -27,7 +27,6 @@ class Context;
 class DataView;
 class Data;
 class Date;
-class DictionaryTemplate;
 class Extension;
 class External;
 class FixedArray;

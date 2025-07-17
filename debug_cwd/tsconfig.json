@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "module": "AMD",
+        "target": "ES2017",
+        "noEmitOnError": true,
+        "noImplicitAny": true,
+        "noLib": true,
+        "outDir": "./internal/dist",
+        "rootDir": "./",
+        "typeRoots": [
+            "./internal/lib"
+        ],
+        "types": ["core", "builtins"],
+        "outFile": "./internal/dist/bundle.js",
+        "skipLibCheck": true,
+        "skipDefaultLibCheck": true
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["./internal"]
+}

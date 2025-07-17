@@ -48,6 +48,12 @@ namespace tspp {
              */
             u8* alloc(bind::DataType* dataType);
 
+            /**
+             * @brief Adds a callback to the context
+             * @param callback The callback to add
+             */
+            void addCallback(void* callback);
+
         private:
             struct Allocation {
                 bind::DataType* type;
@@ -55,6 +61,7 @@ namespace tspp {
             };
 
             Array<Allocation> m_allocations;
+            Array<void*> m_callbacks;
             u8* m_nextAllocationOverride;
             v8::Isolate* m_isolate;
             v8::Local<v8::Context> m_context;

@@ -11,6 +11,7 @@ namespace bind {
 
 namespace tspp {
     class Runtime;
+    class SourceFileBuilder;
 
     /**
      * @brief Module that provides binding functionality between C++ and JavaScript
@@ -55,10 +56,18 @@ namespace tspp {
             
         private:
             void bindBuiltInTypes();
-            void processGlobalSymbol(bind::ISymbol* symbol);
+            void processGlobalSymbol(SourceFileBuilder& dts, bind::ISymbol* symbol);
             void processNamespace(bind::Namespace* ns);
             v8::Local<v8::Function> processFunction(bind::Function* function);
             v8::Local<v8::Value> processDataType(bind::DataType* dataType);
+
+            void emitNamespace(SourceFileBuilder& dts, bind::Namespace* ns);
+            void emitFunction(SourceFileBuilder& dts, bind::Function* function);
+            void emitFunctionDocs(SourceFileBuilder& dts, bind::Function* function);
+            void emitDataType(SourceFileBuilder& dts, bind::DataType* dataType);
+            bind::DataType* resolveType(bind::DataType* dataType);
+            String getTypeName(bind::DataType* dataType);
+            String getArgList(bind::Function* func);
 
             // Runtime
             Runtime* m_runtime;

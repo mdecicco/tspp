@@ -4,9 +4,14 @@
 #include <utils/Exception.h>
 
 namespace tspp {
-    void WeakCallback(const v8::WeakCallbackInfo<HostObjectManager>& info) {
-        HostObjectManager* manager = static_cast<HostObjectManager*>(info.GetParameter());
-        manager->free(info.GetInternalField(0));
+    struct ObjectData_TempWorkaround {
+        void* mem;
+        HostObjectManager* manager;
+    };
+
+    void WeakCallback(const v8::WeakCallbackInfo<ObjectData_TempWorkaround>& info) {
+        ObjectData_TempWorkaround* data = static_cast<ObjectData_TempWorkaround*>(info.GetParameter());
+        data->manager->free(data->mem);
     }
 
     HostObjectManager::HostObjectManager(bind::DataType* dataType, u32 elementsPerPool)
@@ -121,6 +126,7 @@ namespace tspp {
     }
 
     void HostObjectManager::bindGCListener(ObjRef& ref, void* mem) {
-        ref->SetWeak(this, WeakCallback, v8::WeakCallbackType::kInternalFields);
+        ObjectData_TempWorkaround* data = new ObjectData_TempWorkaround({ mem, this });
+        ref->SetWeak(data, WeakCallback, v8::WeakCallbackType::kParameter);
     }
 }

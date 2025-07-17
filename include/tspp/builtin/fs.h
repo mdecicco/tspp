@@ -1,5 +1,6 @@
 #pragma once
 #include <tspp/types.h>
+#include <tspp/builtin/databuffer.h>
 #include <utils/String.h>
 #include <utils/Array.h>
 
@@ -64,8 +65,8 @@ namespace tspp::builtin::fs {
             BasicFileStream(const BasicFileStream& other);
             ~BasicFileStream();
 
-            void write(u32 offset, const Array<u8>& data);
-            Array<u8> read(u32 offset, u32 size);
+            void write(u32 offset, const builtin::databuffer::DataBuffer& data);
+            builtin::databuffer::DataBuffer read(u32 offset, u32 size);
             const FileStatus& status() const;
 
         protected:

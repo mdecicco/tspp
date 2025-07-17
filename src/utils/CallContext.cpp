@@ -1,4 +1,5 @@
 #include <tspp/utils/CallContext.h>
+#include <tspp/utils/Callback.h>
 #include <bind/DataType.h>
 #include <bind/Function.h>
 #include <utils/Array.hpp>
@@ -23,7 +24,9 @@ namespace tspp {
             delete [] allocation.data;
         }
 
-        m_allocations.clear();
+        for (void* callback : m_callbacks) {
+            Callback::Release(callback);
+        }
     }
 
     v8::Isolate* CallContext::getIsolate() const {
@@ -54,5 +57,9 @@ namespace tspp {
         allocation.data = new u8[dataType->getInfo().size];
         m_allocations.push(allocation);
         return allocation.data;
+    }
+
+    void CallContext::addCallback(void* callback) {
+        m_callbacks.push(callback);
     }
 }

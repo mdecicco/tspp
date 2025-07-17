@@ -38,6 +38,11 @@ namespace tspp {
 
     bool ScriptSystem::initialize() {
         logDebug("Initializing");
+        if (!v8::V8::InitializeICUDefaultLocation("C:/Users/miguel/programming/tspp/bin/Debug/tspp_playground.exe")) {
+            logError("Call to V8::InitializeICUDefaultLocation failed");
+            return false;
+        }
+        v8::V8::InitializeExternalStartupData("C:/Users/miguel/programming/tspp/debug_cwd");
         
         v8::V8::SetFlagsFromString("--turbo-fast-api-calls");
 
@@ -51,11 +56,16 @@ namespace tspp {
         create_params.array_buffer_allocator = v8::ArrayBuffer::Allocator::NewDefaultAllocator();
         
         // Set initial heap size constraints
-        create_params.constraints.set_max_old_generation_size_in_bytes(m_config.maximumHeapSize);
-        create_params.constraints.set_max_young_generation_size_in_bytes(m_config.initialHeapSize);
+        create_params.constraints.ConfigureDefaultsFromHeapSize(
+            m_config.initialHeapSize,
+            m_config.maximumHeapSize
+        );
         
         // Create the isolate
         m_isolate = v8::Isolate::New(create_params);
+
+        logDebug("Initialized");
+        m_initialized = true;
 
         bool didFail = false;
         
@@ -97,11 +107,10 @@ namespace tspp {
             v8::V8::DisposePlatform();
 
             logDebug("Shut down successfully");
+            m_initialized = false;
             return false;
         }
-        
-        logDebug("Initialized");
-        m_initialized = true;
+
         return true;
     }
 
@@ -123,13 +132,23 @@ namespace tspp {
             
             // Compile the source code
             v8::Local<v8::Script> script;
-            v8::ScriptOrigin origin(v8::String::NewFromUtf8(m_isolate, filename.c_str()).ToLocalChecked());
+            v8::ScriptOrigin origin(m_isolate, v8::String::NewFromUtf8(m_isolate, filename.c_str()).ToLocalChecked());
             
             v8::TryCatch try_catch(m_isolate);
             
             if (!v8::Script::Compile(context, source, &origin).ToLocal(&script)) {
                 v8::String::Utf8Value error(m_isolate, try_catch.Exception());
                 logError("Compilation error: %s", *error);
+
+                v8::Local<v8::Value> stackTrace;
+                if (try_catch.StackTrace(context).ToLocal(&stackTrace) && !stackTrace.IsEmpty()) {
+                    v8::Local<v8::String> stackTraceStr;
+                    if (stackTrace->ToString(context).ToLocal(&stackTraceStr) && !stackTraceStr.IsEmpty()) {
+                        v8::String::Utf8Value trace(m_isolate, stackTraceStr);
+                        logError(*trace);
+                    }
+                }
+
                 return v8::Local<v8::Value>();
             }
             
@@ -137,7 +156,17 @@ namespace tspp {
             v8::Local<v8::Value> result;
             if (!script->Run(context).ToLocal(&result)) {
                 v8::String::Utf8Value error(m_isolate, try_catch.Exception());
-                logError("Execution error: %s", *error);
+                logError(*error);
+
+                v8::Local<v8::Value> stackTrace;
+                if (try_catch.StackTrace(context).ToLocal(&stackTrace) && !stackTrace.IsEmpty()) {
+                    v8::Local<v8::String> stackTraceStr;
+                    if (stackTrace->ToString(context).ToLocal(&stackTraceStr) && !stackTraceStr.IsEmpty()) {
+                        v8::String::Utf8Value trace(m_isolate, stackTraceStr);
+                        logError(*trace);
+                    }
+                }
+
                 return v8::Local<v8::Value>();
             }
             
@@ -177,5 +206,11 @@ namespace tspp {
         
         logDebug("Shut down successfully");
         m_initialized = false;
+    }
+
+    void ScriptSystem::onAfterBindings() {
+        for (u32 i = 0;i < m_modules.size();i++) {
+            m_modules[i]->onAfterBindings();
+        }
     }
 } 

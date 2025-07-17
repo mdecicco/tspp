@@ -16,6 +16,10 @@ namespace tspp {
     bool IScriptSystemModule::initialize() {
         return true;
     }
+
+    bool IScriptSystemModule::onAfterBindings() {
+        return true;
+    }
     
     void IScriptSystemModule::shutdown() {
     }

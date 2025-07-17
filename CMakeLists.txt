@@ -13,7 +13,6 @@ endif ()
 add_compile_definitions($<$<CONFIG:Debug>:_ITERATOR_DEBUG_LEVEL=0>)
 add_compile_definitions(V8_COMPRESS_POINTERS)
 add_compile_definitions(V8_ENABLE_SANDBOX)
-add_compile_definitions(V8_ENABLE_CHECKS)
 add_compile_definitions(BIND_DATATYPE_USERDATA_SIZE=64)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
@@ -52,6 +51,7 @@ add_sources("src/builtin"      "builtin")
 add_sources("src/modules"      "modules")
 add_sources("src/systems"      "systems")
 add_sources("src/interfaces"   "interfaces")
+add_sources("src/marshalling"  "marshalling")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -63,6 +63,34 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/deps/v8/include
 )
 
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/include/tspp/builtin/compiler.h
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/deps/js/bin2h.exe ${CMAKE_CURRENT_SOURCE_DIR}/deps/js/compiler.js ${CMAKE_CURRENT_SOURCE_DIR}/include/tspp/builtin/compiler.h -id=compiler_code
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/js/compiler.js
+    VERBATIM
+)
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/include/tspp/builtin/tsc.h
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/deps/js/bin2h.exe ${CMAKE_CURRENT_SOURCE_DIR}/deps/js/tsc.js ${CMAKE_CURRENT_SOURCE_DIR}/include/tspp/builtin/tsc.h -id=tsc_code
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/js/tsc.js
+    VERBATIM
+)
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/include/tspp/builtin/core.d.h
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/deps/js/bin2h.exe ${CMAKE_CURRENT_SOURCE_DIR}/deps/js/core.d.ts ${CMAKE_CURRENT_SOURCE_DIR}/include/tspp/builtin/core.d.h -id=core_code
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/deps/js/core.d.ts
+    VERBATIM
+)
+
+add_custom_target(
+    builtin_js ALL DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/tspp/builtin/compiler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/tspp/builtin/tsc.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/tspp/builtin/core.d.h
+)
+
 add_library(tspp ${all_sources})
 set_property(TARGET tspp PROPERTY CXX_STANDARD 20)
 set_property(TARGET tspp PROPERTY CXX_STANDARD_REQUIRED ON)
@@ -70,8 +98,11 @@ target_link_directories(tspp PUBLIC "./deps/v8/lib")
 target_link_directories(tspp PUBLIC "./lib")
 target_link_libraries(tspp
     bind
-    v8_monolith
-    WinMM
+    v8
+    v8_libplatform
 )
 
+add_dependencies(tspp builtin_js)
+
 add_subdirectory("./test")
+add_subdirectory("./playground")

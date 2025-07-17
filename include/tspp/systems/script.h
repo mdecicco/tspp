@@ -78,6 +78,9 @@ namespace tspp {
             void shutdown();
             
         private:
+            friend class Runtime;
+            void onAfterBindings();
+
             // Configuration
             ScriptConfig m_config;
             bool m_initialized = false;

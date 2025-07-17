@@ -3,6 +3,7 @@
 #include <tspp/utils/CallContext.h>
 #include <tspp/utils/CallProxy.h>
 #include <tspp/utils/HostObjectManager.h>
+#include <tspp/utils/Docs.h>
 #include <utils/Array.hpp>
 #include <bind/DataType.h>
 #include <bind/Function.h>
@@ -63,11 +64,12 @@ namespace tspp {
     valid_v8_ret_t<T> get_attr(v8::Local<v8::Object> obj, v8::FastApiCallbackOptions& opts) {
         u8* ptr = (u8*)obj->GetInternalField(0).As<v8::Value>().As<v8::External>()->Value();
         if (ptr == (void*)intptr_t(0xdeadbeef)) {
-            opts.isolate->ThrowException(
-                v8::Exception::Error(
-                    v8::String::NewFromUtf8(opts.isolate, "'this' object has been destroyed").ToLocalChecked()
-                )
-            );
+            // TODO: Doesn't exist in version 11.9.169.4
+            // opts.isolate->ThrowException(
+            //     v8::Exception::Error(
+            //         v8::String::NewFromUtf8(opts.isolate, "'this' object has been destroyed").ToLocalChecked()
+            //     )
+            // );
             return valid_v8_ret_t<T>(0);
         }
 
@@ -79,11 +81,12 @@ namespace tspp {
     void set_attr(v8::Local<v8::Object> obj, valid_v8_arg_t<T> value, v8::FastApiCallbackOptions& opts) {
         u8* ptr = (u8*)obj->GetInternalField(0).As<v8::Value>().As<v8::External>()->Value();
         if (ptr == (void*)intptr_t(0xdeadbeef)) {
-            opts.isolate->ThrowException(
-                v8::Exception::Error(
-                    v8::String::NewFromUtf8(opts.isolate, "'this' object has been destroyed").ToLocalChecked()
-                )
-            );
+            // TODO: Doesn't exist in version 11.9.169.4
+            // opts.isolate->ThrowException(
+            //     v8::Exception::Error(
+            //         v8::String::NewFromUtf8(opts.isolate, "'this' object has been destroyed").ToLocalChecked()
+            //     )
+            // );
             return;
         }
 
@@ -113,7 +116,7 @@ namespace tspp {
         DataTypeUserData& userData = type->getUserData<DataTypeUserData>();
 
         CallContext callCtx(isolate, context);
-        v8::Local<v8::Value> ret = userData.marshallingData->toV8(callCtx, ptr + prop->offset);
+        v8::Local<v8::Value> ret = userData.marshaller->toV8(callCtx, ptr + prop->offset);
         args.GetReturnValue().Set(scope.Escape(ret));
     }
 
@@ -140,7 +143,7 @@ namespace tspp {
 
         CallContext callCtx(isolate, context);
         callCtx.setNextAllocation(ptr + prop->offset);
-        userData.marshallingData->fromV8(callCtx, args[0]);
+        userData.marshaller->fromV8(callCtx, args[0]);
     }
 
     template <typename T>
@@ -169,7 +172,7 @@ namespace tspp {
         DataTypeUserData& userData = type->getUserData<DataTypeUserData>();
 
         CallContext callCtx(isolate, context);
-        v8::Local<v8::Value> ret = userData.marshallingData->toV8(callCtx, ptr);
+        v8::Local<v8::Value> ret = userData.marshaller->toV8(callCtx, ptr);
         args.GetReturnValue().Set(scope.Escape(ret));
     }
 
@@ -186,7 +189,7 @@ namespace tspp {
 
         CallContext callCtx(isolate, context);
         callCtx.setNextAllocation(ptr);
-        userData.marshallingData->fromV8(callCtx, args[0]);
+        userData.marshaller->fromV8(callCtx, args[0]);
     }
 
     template <typename T>
@@ -279,6 +282,22 @@ namespace tspp {
         
         // Get the pointer and type
         bind::DataType* type = static_cast<bind::DataType*>(obj->GetInternalField(1).As<v8::Value>().As<v8::External>()->Value());
+
+        HostObjectManager* objMgr = type->getUserData<DataTypeUserData>().hostObjectManager;
+        if (!objMgr) {
+            isolate->ThrowException(
+                v8::Exception::TypeError(
+                    v8::String::NewFromUtf8(
+                        isolate,
+                        String::Format(
+                            "Host object manager not found for type '%s'",
+                            type->getName().c_str()
+                        ).c_str()
+                    ).ToLocalChecked()
+                )
+            );
+            return;
+        }
         
         // Call destructor if needed
         bind::Function* dtor = type->getDestructor();
@@ -288,7 +307,7 @@ namespace tspp {
         }
         
         // Free memory
-        delete[] objPtr;
+        objMgr->free(objPtr);
         
         // Mark as destroyed
         obj->SetInternalField(0, v8::External::New(isolate, (void*)intptr_t(0xdeadbeef)));
@@ -357,7 +376,7 @@ namespace tspp {
 
                 bind::DataType* argType = arg.type;
                 DataTypeUserData& userData = argType->getUserData<DataTypeUserData>();
-                if (!userData.marshallingData->canAccept(isolate, args[a])) {
+                if (!userData.marshaller->canAccept(isolate, args[a])) {
                     canAccept = false;
                     break;
                 }
@@ -412,7 +431,7 @@ namespace tspp {
         ConstArrayView<bind::FunctionType::Argument> explicitArgs = selectedCtor->getExplicitArgs();
         for (size_t i = 0; i < explicitArgs.size(); i++) {
             DataTypeUserData& data = explicitArgs[i].type->getUserData<DataTypeUserData>();
-            callArgs[i + 1] = data.marshallingData->fromV8(callCtx, args[i]);
+            callArgs[i + 1] = data.marshaller->fromV8(callCtx, args[i]);
         }
 
         selectedCtor->call(nullptr, callArgs);
@@ -515,11 +534,18 @@ namespace tspp {
     }
 
     void bindMethod(v8::Isolate* isolate, v8::Local<v8::ObjectTemplate> proto, const bind::DataType::Property& p) {
+        bind::Function* func = (bind::Function*)p.address.get();
+        FunctionUserData& userData = func->getUserData<FunctionUserData>();
+        FunctionDocumentation* docs = userData.documentation;
+        bool isAsync = docs ? docs->isAsync() : false;
+
         proto->Set(
             v8::String::NewFromUtf8(isolate, p.name.c_str()).ToLocalChecked(),
             v8::FunctionTemplate::New(
                 isolate,
-                p.flags.is_static == 1 ? FunctionCallProxy : MethodCallProxy,
+                p.flags.is_static == 1 ?
+                    (isAsync ? AsyncFunctionCallProxy : FunctionCallProxy) :
+                    (isAsync ? AsyncMethodCallProxy : MethodCallProxy),
                 v8::External::New(isolate, p.address.get()),
                 v8::Local<v8::Signature>(),
                 0,

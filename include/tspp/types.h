@@ -1,9 +1,12 @@
 #pragma once
 #include <utils/types.h>
 
+#ifndef TSPP_INCLUDING_WINDOWS_H
+// Windows.h tramples the global scope, does not play nicely with "namespace bind"
 namespace bind {
     class DataType;
 }
+#endif
 
 namespace tspp {
     using namespace utils;
@@ -12,7 +15,6 @@ namespace tspp {
      * @brief Configuration options for the script system
      */
     struct ScriptConfig {
-        // V8 options
         u64 initialHeapSize = 32 * 1024 * 1024;  // 32MB
         u64 maximumHeapSize = 512 * 1024 * 1024; // 512MB
     };
@@ -22,24 +24,20 @@ namespace tspp {
      */
     struct RuntimeConfig {
         // File system options
-        bool watchMode = false;
-        const char* rootDirectory = ".";
-        
-        // Caching options
-        bool cacheCompiledOutput = true;
-        bool cacheV8Bytecode = true;
-        const char* cacheDirectory = "./.tspp_cache";
+        const char* scriptRootDirectory = ".";
         
         // Script system options
         ScriptConfig scriptConfig;
     };
 
+    #ifndef TSPP_INCLUDING_WINDOWS_H
     class IDataMarshaller;
     class HostObjectManager;
+    class DataTypeDocumentation;
     struct JavaScriptTypeData;
     struct DataTypeUserData {
         const char* typescriptType;
-        IDataMarshaller* marshallingData;
+        IDataMarshaller* marshaller;
         JavaScriptTypeData* javascriptData;
         HostObjectManager* hostObjectManager;
 
@@ -48,5 +46,13 @@ namespace tspp {
          * If this type is not an array, this will be nullptr.
          */
         bind::DataType* arrayElementType;
+        DataTypeDocumentation* documentation;
     };
+
+    class FunctionDocumentation;
+    struct FunctionUserData {
+        FunctionDocumentation* documentation;
+    };
+    #endif
 };
+

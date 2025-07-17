@@ -36,6 +36,13 @@ namespace tspp {
              * @return bool True if initialization succeeded
              */
             virtual bool initialize();
+
+            /**
+             * @brief Called after bindings are loaded
+             * 
+             * @return bool True if initialization succeeded
+             */
+            virtual bool onAfterBindings();
             
             /**
              * @brief Shuts down the module

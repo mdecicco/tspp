@@ -105,10 +105,11 @@ namespace tspp {
     void RelativeRequireCallback(const v8::FunctionCallbackInfo<v8::Value>& args) {
         v8::Isolate* isolate = args.GetIsolate();
         v8::HandleScope scope(isolate);
+        v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
         v8::Local<v8::Object> data = args.Data().As<v8::Object>();
-        v8::Local<v8::Value> moduleSystemValue = data->GetInternalField(0).As<v8::Value>();
-        v8::Local<v8::Value> moduleObjValue = data->GetInternalField(1).As<v8::Value>();
+        v8::Local<v8::Value> moduleSystemValue = data->Get(context, v8::String::NewFromUtf8(isolate, "a").ToLocalChecked()).ToLocalChecked();
+        v8::Local<v8::Value> moduleObjValue = data->Get(context, v8::String::NewFromUtf8(isolate, "b").ToLocalChecked()).ToLocalChecked();
         
         v8::Local<v8::Object> moduleObj = moduleObjValue.As<v8::Object>();
         ModuleSystemModule* moduleSystem = (ModuleSystemModule*)moduleSystemValue.As<v8::External>()->Value();
@@ -128,7 +129,6 @@ namespace tspp {
         String id = *idStr;
         
         // Get the parent module ID
-        v8::Local<v8::Context> context = isolate->GetCurrentContext();
         v8::MaybeLocal<v8::Value> thisId = moduleObj->Get(context, v8::String::NewFromUtf8(isolate, "id").ToLocalChecked());
         v8::Local<v8::Value> moduleValue;
         String parentId;
@@ -295,6 +295,8 @@ namespace tspp {
     
     v8::Local<v8::Value> ModuleSystemModule::requireModule(const String& id) {
         v8::Isolate* isolate = m_scriptSystem->getIsolate();
+        v8::Isolate::Scope isolateScope(isolate);
+
         v8::EscapableHandleScope scope(isolate);
         
         // Resolve the module ID
@@ -314,6 +316,8 @@ namespace tspp {
     
     v8::Local<v8::Value> ModuleSystemModule::loadModule(const String& id) {
         v8::Isolate* isolate = m_scriptSystem->getIsolate();
+        v8::Isolate::Scope isolateScope(isolate);
+
         v8::EscapableHandleScope scope(isolate);
         v8::Local<v8::Context> context = m_scriptSystem->getContext();
         v8::Context::Scope contextScope(context);
@@ -444,8 +448,8 @@ namespace tspp {
         ).Check();
 
         v8::Local<v8::Object> data = v8::Object::New(isolate);
-        data->SetInternalField(0, v8::External::New(isolate, this));
-        data->SetInternalField(1, moduleObj);
+        data->Set(context, v8::String::NewFromUtf8(isolate, "a").ToLocalChecked(), v8::External::New(isolate, this));
+        data->Set(context, v8::String::NewFromUtf8(isolate, "b").ToLocalChecked(), moduleObj);
         
         // Create a local require function that resolves relative to this module
         requireFunc = v8::Function::New(

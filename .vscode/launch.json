@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Tests (Debug)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/Debug/tspp_playground.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}/debug_cwd",
+            "preLaunchTask": "CMake: build",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run Playground (Debug)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/Debug/tspp_playground.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}/debug_cwd",
+            "preLaunchTask": "CMake: build",
+            "console": "integratedTerminal"
+        }
+    ]
+}

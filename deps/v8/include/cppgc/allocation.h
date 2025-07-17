@@ -44,9 +44,10 @@ class AllocationHandle;
 
 namespace internal {
 
-using AlignVal = std::align_val_t;
+// Similar to C++17 std::align_val_t;
+enum class AlignVal : size_t {};
 
-class MakeGarbageCollectedTraitInternal {
+class V8_EXPORT MakeGarbageCollectedTraitInternal {
  protected:
   static inline void MarkObjectAsFullyConstructed(const void* payload) {
     // See api_constants for an explanation of the constants.
@@ -120,15 +121,16 @@ class MakeGarbageCollectedTraitInternal {
   };
 
  private:
-  V8_EXPORT static void* CPPGC_DEFAULT_ALIGNED
-  Allocate(cppgc::AllocationHandle&, size_t, GCInfoIndex);
-  V8_EXPORT static void* CPPGC_DOUBLE_WORD_ALIGNED
-  Allocate(cppgc::AllocationHandle&, size_t, AlignVal, GCInfoIndex);
-  V8_EXPORT static void* CPPGC_DEFAULT_ALIGNED
-  Allocate(cppgc::AllocationHandle&, size_t, GCInfoIndex, CustomSpaceIndex);
-  V8_EXPORT static void* CPPGC_DOUBLE_WORD_ALIGNED
-  Allocate(cppgc::AllocationHandle&, size_t, AlignVal, GCInfoIndex,
-           CustomSpaceIndex);
+  static void* CPPGC_DEFAULT_ALIGNED Allocate(cppgc::AllocationHandle&, size_t,
+                                              GCInfoIndex);
+  static void* CPPGC_DOUBLE_WORD_ALIGNED Allocate(cppgc::AllocationHandle&,
+                                                  size_t, AlignVal,
+                                                  GCInfoIndex);
+  static void* CPPGC_DEFAULT_ALIGNED Allocate(cppgc::AllocationHandle&, size_t,
+                                              GCInfoIndex, CustomSpaceIndex);
+  static void* CPPGC_DOUBLE_WORD_ALIGNED Allocate(cppgc::AllocationHandle&,
+                                                  size_t, AlignVal, GCInfoIndex,
+                                                  CustomSpaceIndex);
 
   friend class HeapObjectHeader;
 };

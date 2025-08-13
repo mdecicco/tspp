@@ -4,3 +4,9 @@
 [submodule "test/Catch2"]
 	path = test/Catch2
 	url = https://github.com/catchorg/Catch2.git
+[submodule "deps/websocketpp"]
+	path = deps/websocketpp
+	url = https://github.com/zaphoyd/websocketpp.git
+[submodule "deps/asio"]
+	path = deps/asio
+	url = https://github.com/chriskohlhoff/asio.git

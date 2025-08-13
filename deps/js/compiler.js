@@ -1294,17 +1294,9 @@
 
         writeFile(fileName, data, writeByteOrderMark) {
             // TODO: Implement writeByteOrderMark
-            fileName = path.normalize(fileName);
             fs.mkdirSync(path.dirname(fileName), true);
-            // console.log('writeFile', fileName, path.dirname(fileName));
+            console.debug('Outputting compiled file:', fileName);
             fs.writeFileTextSync(fileName, data);
-            if (fileName.includes('.js')) {
-                try {
-                    eval(data);
-                } catch (e) {
-                    console.error('Error registering compiled module', String(e.stack));
-                }
-            }
         }
 
         getCanonicalFileName(fileName) {

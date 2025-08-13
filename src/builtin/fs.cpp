@@ -1,6 +1,6 @@
-#include <tspp/builtin/fs.h>
 #include <tspp/bind.h>
 #include <tspp/builtin/databuffer.h>
+#include <tspp/builtin/fs.h>
 #include <tspp/utils/Docs.h>
 #include <utils/Array.hpp>
 
@@ -33,7 +33,7 @@ namespace tspp::builtin::fs {
         try {
             return std::filesystem::exists(path.c_str());
         } catch (const std::filesystem::filesystem_error& e) {
-            throw Exception(e.what());
+            throw FileException(e.what());
         }
     }
 
@@ -42,12 +42,12 @@ namespace tspp::builtin::fs {
 
         try {
             std::filesystem::file_status status = std::filesystem::status(path.c_str());
-            s.type = convertToFileType(status.type());
-            s.permissions = FilePermissions(status.permissions());
+            s.type                              = convertToFileType(status.type());
+            s.permissions                       = FilePermissions(status.permissions());
             s.modifiedOn = std::filesystem::last_write_time(path.c_str()).time_since_epoch().count();
-            s.size = std::filesystem::file_size(path.c_str());
+            s.size       = std::filesystem::file_size(path.c_str());
         } catch (const std::filesystem::filesystem_error& e) {
-            throw Exception(e.what());
+            throw FileException(e.what());
         }
 
         return s;
@@ -60,20 +60,17 @@ namespace tspp::builtin::fs {
             for (const auto& entry : std::filesystem::directory_iterator(path.c_str())) {
                 FileStatus s;
 
-                s.type = convertToFileType(entry.status().type());
+                s.type        = convertToFileType(entry.status().type());
                 s.permissions = FilePermissions(entry.status().permissions());
-                s.modifiedOn = entry.last_write_time().time_since_epoch().count();
-                s.size = entry.file_size();
+                s.modifiedOn  = entry.last_write_time().time_since_epoch().count();
+                s.size        = entry.file_size();
 
                 entries.push(DirEntry{
-                    s,
-                    entry.path().filename().string(),
-                    entry.path().string(),
-                    entry.path().extension().string()
+                    s, entry.path().filename().string(), entry.path().string(), entry.path().extension().string()
                 });
             }
         } catch (const std::filesystem::filesystem_error& e) {
-            throw Exception(e.what());
+            throw FileException(e.what());
         }
 
         return entries;
@@ -83,14 +80,18 @@ namespace tspp::builtin::fs {
         try {
             std::ifstream file(path.c_str(), std::ios::in | std::ios::binary);
             if (!file.is_open()) {
-                throw Exception("File not found");
+                throw FileException("File not found");
             }
 
             file.seekg(0, std::ios::end);
             u64 size = file.tellg();
-            if (size > UINT32_MAX) throw Exception("File is too large");
+            if (size > UINT32_MAX) {
+                throw RangeException("File is too large");
+            }
 
-            if (size == 0) return builtin::databuffer::DataBuffer(0);
+            if (size == 0) {
+                return builtin::databuffer::DataBuffer(0);
+            }
 
             builtin::databuffer::DataBuffer data(size);
 
@@ -99,7 +100,7 @@ namespace tspp::builtin::fs {
 
             return data;
         } catch (const std::exception& e) {
-            throw Exception(e.what());
+            throw FileException(e.what());
         }
     }
 
@@ -108,7 +109,7 @@ namespace tspp::builtin::fs {
             std::ofstream file(path.c_str(), std::ios::out | std::ios::binary);
             file.write((char*)data.data(), data.size());
         } catch (const std::exception& e) {
-            throw Exception(e.what());
+            throw FileException(e.what());
         }
     }
 
@@ -117,7 +118,7 @@ namespace tspp::builtin::fs {
             std::ofstream file(path.c_str(), std::ios::out);
             file.write(text.c_str(), text.size());
         } catch (const std::exception& e) {
-            throw Exception(e.what());
+            throw FileException(e.what());
         }
     }
 
@@ -128,7 +129,7 @@ namespace tspp::builtin::fs {
             buffer << file.rdbuf();
             return buffer.str();
         } catch (const std::exception& e) {
-            throw Exception(e.what());
+            throw FileException(e.what());
         }
     }
 
@@ -142,7 +143,9 @@ namespace tspp::builtin::fs {
     }
 
     BasicFileStream::~BasicFileStream() {
-        if (m_file.is_open()) m_file.close();
+        if (m_file.is_open()) {
+            m_file.close();
+        }
     }
 
     void BasicFileStream::write(u32 offset, const builtin::databuffer::DataBuffer& data) {
@@ -150,7 +153,7 @@ namespace tspp::builtin::fs {
             m_file.seekp(offset);
             m_file.write((char*)data.data(), data.size());
         } catch (const std::exception& e) {
-            throw Exception(e.what());
+            throw FileException(e.what());
         }
     }
 
@@ -161,7 +164,7 @@ namespace tspp::builtin::fs {
             m_file.read((char*)data.data(), size);
             return data;
         } catch (const std::exception& e) {
-            throw Exception(e.what());
+            throw FileException(e.what());
         }
     }
 
@@ -170,12 +173,16 @@ namespace tspp::builtin::fs {
     }
 
     BasicFileStream* openFile(const String& path) {
-        if (!exists(path)) throw Exception("File does not exist");
+        if (!exists(path)) {
+            throw FileException("File does not exist");
+        }
         return new BasicFileStream(path);
     }
 
     void closeFile(BasicFileStream* stream) {
-        if (!stream) return;
+        if (!stream) {
+            return;
+        }
         delete stream;
     }
 
@@ -187,7 +194,7 @@ namespace tspp::builtin::fs {
         if (recursive) {
             return std::filesystem::create_directories(path.c_str());
         }
-        
+
         return std::filesystem::create_directory(path.c_str());
     }
 

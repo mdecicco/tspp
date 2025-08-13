@@ -3,15 +3,11 @@
 
 namespace tspp {
     IScriptSystemModule::IScriptSystemModule(
-        ScriptSystem* scriptSystem,
-        const char* logContextName,
-        const char* submoduleName
+        ScriptSystem* scriptSystem, const char* logContextName, const char* submoduleName
     )
-        : IWithLogging(logContextName), m_scriptSystem(scriptSystem), m_name(submoduleName) {
-    }
-    
-    IScriptSystemModule::~IScriptSystemModule() {
-    }
+        : IWithLogging(logContextName), m_scriptSystem(scriptSystem), m_name(submoduleName) {}
+
+    IScriptSystemModule::~IScriptSystemModule() {}
 
     bool IScriptSystemModule::initialize() {
         return true;
@@ -20,10 +16,11 @@ namespace tspp {
     bool IScriptSystemModule::onAfterBindings() {
         return true;
     }
-    
-    void IScriptSystemModule::shutdown() {
-    }
-    
+
+    void IScriptSystemModule::service() {}
+
+    void IScriptSystemModule::shutdown() {}
+
     ScriptSystem* IScriptSystemModule::getScriptSystem() const {
         return m_scriptSystem;
     }
@@ -31,4 +28,4 @@ namespace tspp {
     const char* IScriptSystemModule::getName() const {
         return m_name;
     }
-} 
+}

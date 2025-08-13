@@ -8,3 +8,6 @@ v8_11.9.169.4
 v8_12.9.202.28
 v8_13.0.245.25
 v8_13.5-lkgr
+include/tspp/builtin/compiler.h
+include/tspp/builtin/tsc.h
+include/tspp/builtin/core.d.h

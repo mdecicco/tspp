@@ -36,7 +36,7 @@ namespace tspp {
              * @brief Checks if there is a specific allocation target set. That is,
              * if the next allocation will be written to a specific location rather
              * than being allocated automatically if necessary.
-             * 
+             *
              * @return True if there is an allocation target, false otherwise
              */
             bool hasAllocationTarget() const;
@@ -54,10 +54,16 @@ namespace tspp {
              */
             void addCallback(void* callback);
 
+            /**
+             * @brief Checks if the context has allocated any memory which will be freed with the call context.
+             * @return True if the context has allocated any memory, false otherwise
+             */
+            bool didAllocate() const;
+
         private:
             struct Allocation {
-                bind::DataType* type;
-                u8* data;
+                    bind::DataType* type;
+                    u8* data;
             };
 
             Array<Allocation> m_allocations;

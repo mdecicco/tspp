@@ -15,44 +15,49 @@ namespace tspp {
      * @brief Configuration options for the script system
      */
     struct ScriptConfig {
-        u64 initialHeapSize = 32 * 1024 * 1024;  // 32MB
-        u64 maximumHeapSize = 512 * 1024 * 1024; // 512MB
+        public:
+            u64 initialHeapSize = 32 * 1024 * 1024;  // 32MB
+            u64 maximumHeapSize = 512 * 1024 * 1024; // 512MB
+            u16 debuggerPort    = 9229;              // Default port for the debugger
+            bool enableDebugger = false;             // Whether to enable the debugger
     };
 
     /**
      * @brief Configuration options for the Runtime
      */
     struct RuntimeConfig {
-        // File system options
-        const char* scriptRootDirectory = ".";
-        
-        // Script system options
-        ScriptConfig scriptConfig;
+        public:
+            // File system options
+            const char* scriptRootDirectory = ".";
+
+            // Script system options
+            ScriptConfig scriptConfig;
     };
 
-    #ifndef TSPP_INCLUDING_WINDOWS_H
+#ifndef TSPP_INCLUDING_WINDOWS_H
     class IDataMarshaller;
     class HostObjectManager;
     class DataTypeDocumentation;
     struct JavaScriptTypeData;
     struct DataTypeUserData {
-        const char* typescriptType;
-        IDataMarshaller* marshaller;
-        JavaScriptTypeData* javascriptData;
-        HostObjectManager* hostObjectManager;
+        public:
+            const char* typescriptType;
+            IDataMarshaller* marshaller;
+            JavaScriptTypeData* javascriptData;
+            HostObjectManager* hostObjectManager;
 
-        /**
-         * @brief The element type of the array, if this type is an array.
-         * If this type is not an array, this will be nullptr.
-         */
-        bind::DataType* arrayElementType;
-        DataTypeDocumentation* documentation;
+            /**
+             * @brief The element type of the array, if this type is an array.
+             * If this type is not an array, this will be nullptr.
+             */
+            bind::DataType* arrayElementType;
+            DataTypeDocumentation* documentation;
     };
 
     class FunctionDocumentation;
     struct FunctionUserData {
-        FunctionDocumentation* documentation;
+        public:
+            FunctionDocumentation* documentation;
     };
-    #endif
+#endif
 };
-

@@ -1,23 +1,26 @@
 #pragma once
-#include <tspp/types.h>
-#include <utils/String.h>
-#include <utils/Array.h>
 #include <tspp/bind.h>
+#include <tspp/types.h>
+#include <utils/Array.h>
+#include <utils/String.h>
 
 namespace tspp {
     class FunctionDocumentation {
         public:
             struct ParameterDocs {
-                u32 parameterIndex;
-                String name;
-                String description;
+                    u32 parameterIndex;
+                    String name;
+                    String description;
+                    bool isNullable;
             };
 
             FunctionDocumentation(bind::Function* function);
             ~FunctionDocumentation();
 
             FunctionDocumentation& desc(const String& description);
-            FunctionDocumentation& param(u32 index, const String& name, const String& description);
+            FunctionDocumentation& param(
+                u32 index, const String& name, const String& description, bool isNullable = false
+            );
             FunctionDocumentation& returns(const String& description);
             FunctionDocumentation& async();
 
@@ -38,8 +41,8 @@ namespace tspp {
     class DataTypeDocumentation {
         public:
             struct PropertyDocs {
-                String name;
-                String description;
+                    String name;
+                    String description;
             };
 
             DataTypeDocumentation();
@@ -61,4 +64,3 @@ namespace tspp {
     FunctionDocumentation& describe(const bind::DataType::Property& method);
     DataTypeDocumentation& describe(bind::DataType* dataType);
 }
-

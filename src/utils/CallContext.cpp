@@ -1,13 +1,13 @@
-#include <tspp/utils/CallContext.h>
-#include <tspp/utils/Callback.h>
 #include <bind/DataType.h>
 #include <bind/Function.h>
+#include <tspp/utils/CallContext.h>
+#include <tspp/utils/Callback.h>
 #include <utils/Array.hpp>
 
 namespace tspp {
     CallContext::CallContext(v8::Isolate* isolate, const v8::Local<v8::Context>& context) {
-        m_isolate = isolate;
-        m_context = context;
+        m_isolate                = isolate;
+        m_context                = context;
         m_nextAllocationOverride = nullptr;
     }
 
@@ -15,13 +15,11 @@ namespace tspp {
         for (Allocation& allocation : m_allocations) {
             bind::Function* dtor = allocation.type->getDestructor();
             if (dtor) {
-                void* args[] = {
-                    &allocation.data
-                };
+                void* args[] = {&allocation.data};
                 dtor->call(nullptr, args);
             }
-            
-            delete [] allocation.data;
+
+            delete[] allocation.data;
         }
 
         for (void* callback : m_callbacks) {
@@ -47,7 +45,7 @@ namespace tspp {
 
     u8* CallContext::alloc(bind::DataType* dataType) {
         if (m_nextAllocationOverride) {
-            u8* old = m_nextAllocationOverride;
+            u8* old                  = m_nextAllocationOverride;
             m_nextAllocationOverride = nullptr;
             return old;
         }
@@ -61,5 +59,9 @@ namespace tspp {
 
     void CallContext::addCallback(void* callback) {
         m_callbacks.push(callback);
+    }
+
+    bool CallContext::didAllocate() const {
+        return m_allocations.size() > 0;
     }
 }

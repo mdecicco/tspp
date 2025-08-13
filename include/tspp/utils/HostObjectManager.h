@@ -1,8 +1,8 @@
 #pragma once
 #include <tspp/types.h>
-#include <tspp/interfaces/IWithLogging.h>
-#include <utils/MemoryPool.h>
 #include <utils/Array.h>
+#include <utils/MemoryPool.h>
+#include <utils/interfaces/IWithLogging.h>
 
 #include <unordered_map>
 #include <v8.h>
@@ -25,7 +25,7 @@ namespace tspp {
             u32 getLiveCount();
             u32 getLiveMemSize();
             v8::Local<v8::Object> getTargetIfMapped(v8::Isolate* isolate, void* mem);
-        
+
         private:
             using ObjRef = std::unique_ptr<v8::Global<v8::Object>>;
             void bindGCListener(ObjRef& ref, void* mem);

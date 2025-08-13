@@ -46,6 +46,20 @@ if (NOT TARGET bind)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/bind)
 endif()
 
+# Force websocketpp to use C++11 features instead of Boost
+add_definitions(-D_WEBSOCKETPP_CPP11_STL_)
+add_definitions(-D_WEBSOCKETPP_CPP11_FUNCTIONAL_)
+add_definitions(-D_WEBSOCKETPP_CPP11_SYSTEM_ERROR_)
+add_definitions(-D_WEBSOCKETPP_CPP11_RANDOM_DEVICE_)
+add_definitions(-D_WEBSOCKETPP_CPP11_MEMORY_)
+add_definitions(-D_WEBSOCKETPP_CPP11_TYPE_TRAITS_)
+
+# Further configuration for websocketpp
+set(BUILD_EXAMPLES OFF)
+set(BUILD_TESTS OFF)
+set(ENABLE_CPP11 ON)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/websocketpp)
+
 add_sources("src"              ".")
 add_sources("src/utils"        "utils")
 add_sources("src/builtin"      "builtin")
@@ -62,6 +76,8 @@ include_directories(
     ${FFI_INCLUDE_DIR}
     ${TSPP_INCLUDE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/deps/v8/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/websocketpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/asio/asio/include
 )
 
 add_custom_command(

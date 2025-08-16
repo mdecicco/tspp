@@ -36,7 +36,9 @@ namespace tspp {
         return true;
     }
 
-    v8::Local<v8::Value> NonTrivialMarshaller::convertToV8(CallContext& callCtx, void* value, bool valueNeedsCopy) {
+    v8::Local<v8::Value> NonTrivialMarshaller::convertToV8(
+        CallContext& callCtx, void* value, bool valueNeedsCopy, bool isHostReturn
+    ) {
         v8::Isolate* isolate = callCtx.getIsolate();
 
         HostObjectManager* objMgr = m_dataType->getUserData<DataTypeUserData>().hostObjectManager;
@@ -56,9 +58,15 @@ namespace tspp {
             return v8::Undefined(isolate);
         }
 
-        v8::Local<v8::Object> obj = objMgr->getTargetIfMapped(isolate, value);
-        if (!obj.IsEmpty()) {
-            return obj;
+        if (!isHostReturn) {
+            // Host return values are preemptively allocated in the HostObjectManager, and the JS reference
+            // is assigned once the conversion is complete. In other words, the object WILL be known to the
+            // HostObjectManager, but it won't have a JS reference yet.
+
+            v8::Local<v8::Object> obj = objMgr->getTargetIfMapped(isolate, value);
+            if (!obj.IsEmpty()) {
+                return obj;
+            }
         }
 
         if (valueNeedsCopy) {

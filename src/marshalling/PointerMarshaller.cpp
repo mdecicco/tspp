@@ -1,34 +1,38 @@
-#include <tspp/marshalling/PointerMarshaller.h>
-#include <tspp/utils/CallContext.h>
 #include <bind/DataType.h>
 #include <bind/PointerType.h>
+#include <tspp/marshalling/PointerMarshaller.h>
+#include <tspp/utils/CallContext.h>
 
 namespace tspp {
-    PointerMarshaller::PointerMarshaller(bind::DataType* dataType) : IDataMarshaller(dataType) {
-    }
+    PointerMarshaller::PointerMarshaller(bind::DataType* dataType) : IDataMarshaller(dataType) {}
 
-    PointerMarshaller::~PointerMarshaller() {
-    }
+    PointerMarshaller::~PointerMarshaller() {}
 
     bool PointerMarshaller::canAccept(v8::Isolate* isolate, const v8::Local<v8::Value>& value) {
-        if (value->IsNull() || value->IsUndefined()) return true;
+        if (value->IsNull() || value->IsUndefined()) {
+            return true;
+        }
 
         const bind::type_meta& meta = m_dataType->getInfo();
-        bind::PointerType* ptrType = (bind::PointerType*)m_dataType;
-        DataTypeUserData& ud = ptrType->getDestinationType()->getUserData<DataTypeUserData>();
+        bind::PointerType* ptrType  = (bind::PointerType*)m_dataType;
+        DataTypeUserData& ud        = ptrType->getDestinationType()->getUserData<DataTypeUserData>();
         return ud.marshaller->canAccept(isolate, value);
     }
 
-    v8::Local<v8::Value> PointerMarshaller::convertToV8(CallContext& context, void* value, bool valueNeedsCopy) {
-        v8::Isolate* isolate = context.getIsolate();
+    v8::Local<v8::Value> PointerMarshaller::convertToV8(
+        CallContext& context, void* value, bool valueNeedsCopy, bool isHostReturn
+    ) {
+        v8::Isolate* isolate        = context.getIsolate();
         const bind::type_meta& meta = m_dataType->getInfo();
 
         void* ptr = *((void**)value);
 
-        if (ptr == nullptr) return v8::Null(isolate);
-        
+        if (ptr == nullptr) {
+            return v8::Null(isolate);
+        }
+
         bind::PointerType* ptrType = (bind::PointerType*)m_dataType;
-        DataTypeUserData& ud = ptrType->getDestinationType()->getUserData<DataTypeUserData>();
+        DataTypeUserData& ud       = ptrType->getDestinationType()->getUserData<DataTypeUserData>();
 
         // TODO:
         // This may need further investigation, but we ignore the valueNeedsCopy flag
@@ -47,7 +51,7 @@ namespace tspp {
     }
 
     void* PointerMarshaller::convertFromV8(CallContext& callCtx, const v8::Local<v8::Value>& value) {
-        v8::Isolate* isolate = callCtx.getIsolate();
+        v8::Isolate* isolate           = callCtx.getIsolate();
         v8::Local<v8::Context> context = callCtx.getContext();
 
         u8* data = callCtx.alloc(m_dataType);
@@ -56,11 +60,11 @@ namespace tspp {
             *((void**)data) = nullptr;
             return data;
         }
-        
+
         const bind::type_meta& meta = m_dataType->getInfo();
-        
+
         bind::PointerType* ptrType = (bind::PointerType*)m_dataType;
-        DataTypeUserData& ud = ptrType->getDestinationType()->getUserData<DataTypeUserData>();
+        DataTypeUserData& ud       = ptrType->getDestinationType()->getUserData<DataTypeUserData>();
 
         *((void**)data) = ud.marshaller->fromV8(callCtx, value);
 

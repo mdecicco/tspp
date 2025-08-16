@@ -8,19 +8,23 @@ namespace bind {
 
 namespace tspp {
     class CallContext;
-    
+
     class IDataMarshaller {
         public:
             IDataMarshaller(bind::DataType* dataType);
             virtual ~IDataMarshaller();
 
-            v8::Local<v8::Value> toV8(CallContext& context, void* value, bool valueNeedsCopy = false);
+            v8::Local<v8::Value> toV8(
+                CallContext& context, void* value, bool valueNeedsCopy = false, bool isHostReturn = false
+            );
             void* fromV8(CallContext& context, const v8::Local<v8::Value>& value);
 
             virtual bool canAccept(v8::Isolate* isolate, const v8::Local<v8::Value>& value) = 0;
 
         protected:
-            virtual v8::Local<v8::Value> convertToV8(CallContext& context, void* value, bool valueNeedsCopy) = 0;
+            virtual v8::Local<v8::Value> convertToV8(
+                CallContext& context, void* value, bool valueNeedsCopy, bool isHostReturn
+            )                                                                                    = 0;
             virtual void* convertFromV8(CallContext& context, const v8::Local<v8::Value>& value) = 0;
 
             bind::DataType* m_dataType;

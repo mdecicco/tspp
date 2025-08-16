@@ -13,7 +13,9 @@ namespace tspp {
         return value->IsFunction();
     }
 
-    v8::Local<v8::Value> FunctionMarshaller::convertToV8(CallContext& context, void* value, bool valueNeedsCopy) {
+    v8::Local<v8::Value> FunctionMarshaller::convertToV8(
+        CallContext& context, void* value, bool valueNeedsCopy, bool isHostReturn
+    ) {
         return createCallback(context.getIsolate(), (bind::FunctionType*)m_dataType, value);
     }
 

@@ -86,7 +86,7 @@ namespace tspp {
             bool retNeedsCopy      = !retObjMgr && retInfo.is_pointer == 0;
             DataTypeUserData& data = retType->getUserData<DataTypeUserData>();
 
-            v8::Local<v8::Value> retVal = data.marshaller->toV8(callCtx, ret, retNeedsCopy);
+            v8::Local<v8::Value> retVal = data.marshaller->toV8(callCtx, ret, retNeedsCopy, true);
 
             if (tryCatch.HasCaught()) {
                 tryCatch.ReThrow();
@@ -264,7 +264,7 @@ namespace tspp {
             bool retNeedsCopy      = !retObjMgr && retInfo.is_pointer == 0;
             DataTypeUserData& data = retType->getUserData<DataTypeUserData>();
 
-            v8::Local<v8::Value> retVal = data.marshaller->toV8(callCtx, ret, retNeedsCopy);
+            v8::Local<v8::Value> retVal = data.marshaller->toV8(callCtx, ret, retNeedsCopy, true);
 
             if (tryCatch.HasCaught()) {
                 tryCatch.ReThrow();
@@ -377,7 +377,7 @@ namespace tspp {
         if (retInfo.size > 0) {
             bool retNeedsCopy           = !retObjMgr && retInfo.is_pointer == 0;
             DataTypeUserData& data      = retType->getUserData<DataTypeUserData>();
-            v8::Local<v8::Value> retVal = data.marshaller->toV8(callCtx, ret, retNeedsCopy);
+            v8::Local<v8::Value> retVal = data.marshaller->toV8(callCtx, ret, retNeedsCopy, true);
 
             if (tryCatch.HasCaught()) {
                 tryCatch.ReThrow();

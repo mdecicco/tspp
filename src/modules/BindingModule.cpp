@@ -128,7 +128,7 @@ namespace tspp {
                 continue;
             }
 
-            if (meta.is_primitive) {
+            if (meta.is_primitive || meta.is_opaque) {
                 userData.marshaller = new PrimitiveMarshaller(dataType);
             } else if (meta.is_function) {
                 userData.marshaller = new FunctionMarshaller(dataType);
@@ -395,6 +395,9 @@ namespace tspp {
         if (meta.is_primitive && !meta.is_enum) {
             return v8::Local<v8::Value>();
         }
+        if (meta.is_opaque) {
+            return v8::Local<v8::Value>();
+        }
 
         DataTypeUserData& userData = dataType->getUserData<DataTypeUserData>();
         if (userData.typescriptType) {
@@ -623,11 +626,12 @@ namespace tspp {
         emitFunctionDocs(builder, function);
 
         builder.line(
-            isAsync ? "%sfunction %s(%s): Promise<%s>;" : "%sfunction %s(%s): %s;",
+            isAsync ? "%sfunction %s(%s): Promise<%s%s>;" : "%sfunction %s(%s): %s%s;",
             isWithinNamespace ? "" : "declare ",
             function->getName().c_str(),
             parameters.size() == 0 ? "" : parameters.c_str(),
-            getTypeName(returnType).c_str()
+            getTypeName(returnType).c_str(),
+            docs && docs->returnIsNullable() ? " | null" : ""
         );
     }
 

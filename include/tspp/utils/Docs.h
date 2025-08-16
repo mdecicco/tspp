@@ -21,11 +21,13 @@ namespace tspp {
             FunctionDocumentation& param(
                 u32 index, const String& name, const String& description, bool isNullable = false
             );
-            FunctionDocumentation& returns(const String& description);
+            FunctionDocumentation& returns(const String& description, bool isNullable = false);
+            FunctionDocumentation& returns(bool isNullable);
             FunctionDocumentation& async();
 
             const String& desc() const;
             const String& returns() const;
+            bool returnIsNullable() const;
             const Array<ParameterDocs>& params() const;
             const ParameterDocs* param(u32 index) const;
             bool isAsync() const;
@@ -34,6 +36,7 @@ namespace tspp {
             u32 m_paramCount;
             String m_description;
             String m_returnDesc;
+            bool m_returnIsNullable;
             Array<ParameterDocs> m_parameters;
             bool m_isAsync;
     };

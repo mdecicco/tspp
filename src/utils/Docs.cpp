@@ -5,8 +5,9 @@
 
 namespace tspp {
     FunctionDocumentation::FunctionDocumentation(bind::Function* function) {
-        m_paramCount = function->getExplicitArgs().size();
-        m_isAsync    = false;
+        m_paramCount       = function->getExplicitArgs().size();
+        m_isAsync          = false;
+        m_returnIsNullable = false;
     }
 
     FunctionDocumentation::~FunctionDocumentation() {}
@@ -36,8 +37,14 @@ namespace tspp {
         return *this;
     }
 
-    FunctionDocumentation& FunctionDocumentation::returns(const String& description) {
-        m_returnDesc = description;
+    FunctionDocumentation& FunctionDocumentation::returns(const String& description, bool isNullable) {
+        m_returnDesc       = description;
+        m_returnIsNullable = isNullable;
+        return *this;
+    }
+
+    FunctionDocumentation& FunctionDocumentation::returns(bool isNullable) {
+        m_returnIsNullable = isNullable;
         return *this;
     }
 
@@ -52,6 +59,10 @@ namespace tspp {
 
     const String& FunctionDocumentation::returns() const {
         return m_returnDesc;
+    }
+
+    bool FunctionDocumentation::returnIsNullable() const {
+        return m_returnIsNullable;
     }
 
     const Array<FunctionDocumentation::ParameterDocs>& FunctionDocumentation::params() const {

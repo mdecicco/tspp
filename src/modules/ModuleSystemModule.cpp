@@ -299,6 +299,26 @@ namespace tspp {
         return id;
     }
 
+    bool ModuleSystemModule::findCircularDependencyPath(
+        const String& rootId, const String& currentId, const ModuleEntry* current, Array<String>& path
+    ) {
+        path.push(currentId);
+
+        for (const String& depId : current->dependencies) {
+            if (depId == rootId) {
+                path.push(rootId);
+                return true;
+            }
+
+            if (findCircularDependencyPath(rootId, depId, &m_modules[depId], path)) {
+                return true;
+            }
+        }
+
+        path.pop();
+        return false;
+    }
+
     v8::Local<v8::Value> ModuleSystemModule::loadModule(const String& id) {
         v8::Isolate* isolate = m_scriptSystem->getIsolate();
         v8::Isolate::Scope isolateScope(isolate);
@@ -324,7 +344,19 @@ namespace tspp {
 
         // Check for circular dependencies
         if (entry.state == ModuleEntry::State::Loading) {
-            error("Circular dependency detected for module '%s'", id.c_str());
+            Array<String> path;
+            findCircularDependencyPath(id, id, &entry, path);
+
+            String pathString;
+            for (const String& p : path) {
+                if (pathString.size() > 0) {
+                    pathString += " -> ";
+                }
+
+                pathString += p;
+            }
+
+            error("Circular dependency detected: %s", pathString.c_str());
             return v8::Undefined(isolate);
         }
 

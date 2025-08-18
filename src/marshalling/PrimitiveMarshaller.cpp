@@ -83,15 +83,27 @@ namespace tspp {
 
             *((bool*)data) = value->BooleanValue(isolate);
         } else if (meta.is_integral || meta.is_opaque) {
+            f64 num = 0.0;
             if (!value->IsNumber()) {
-                isolate->ThrowException(
-                    v8::Exception::TypeError(v8::String::NewFromUtf8(isolate, "Value is not a number").ToLocalChecked())
-                );
+                if (!meta.is_opaque) {
+                    isolate->ThrowException(v8::Exception::TypeError(
+                        v8::String::NewFromUtf8(isolate, "Value is not a number").ToLocalChecked()
+                    ));
 
-                return nullptr;
+                    return nullptr;
+                } else if (!value->IsNull()) {
+                    isolate->ThrowException(v8::Exception::TypeError(
+                        v8::String::NewFromUtf8(
+                            isolate, String::Format("Value is not a valid %s", m_dataType->getName().c_str()).c_str()
+                        )
+                            .ToLocalChecked()
+                    ));
+
+                    return nullptr;
+                }
             }
 
-            f64 num = value->NumberValue(context).ToChecked();
+            num = value->NumberValue(context).ToChecked();
 
             if (meta.is_unsigned || meta.is_opaque) {
                 switch (meta.size) {

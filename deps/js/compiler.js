@@ -1327,7 +1327,7 @@
             include,       // string[] | undefined
             depth          // number | undefined
         ) {
-            // console.log('readDirectory', dirPath, 'extensions:', extensions, 'exclude:', exclude, 'include:', include, 'depth:', depth);
+            if (this.m_doLog) console.log('readDirectory', dirPath, 'extensions:', extensions, 'exclude:', exclude, 'include:', include, 'depth:', depth);
 
             try {
                 // Get all entries in the directory

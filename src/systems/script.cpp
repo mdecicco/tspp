@@ -1,6 +1,7 @@
 #include <tspp/interfaces/IScriptSystemModule.h>
 #include <tspp/modules/ConsoleModule.h>
 #include <tspp/modules/DebuggerModule.h>
+#include <tspp/modules/TimeoutModule.h>
 #include <tspp/systems/script.h>
 
 #include <utils/Array.hpp>
@@ -21,6 +22,7 @@ namespace tspp {
         } else {
             addModule(new ConsoleModule(this), true);
         }
+        addModule(new TimeoutModule(this), true);
     }
 
     ScriptSystem::~ScriptSystem() {

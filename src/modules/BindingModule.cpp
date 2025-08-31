@@ -105,6 +105,19 @@ namespace tspp {
         dts.line("/** 1.7976931348623158e+308 */");
         dts.line("declare const F64_MAX: number;");
 
+        dts.line("declare function setTimeout(callback: () => void, delay?: number): number;");
+        dts.line(
+            "declare function setTimeout<Args extends any[]>(callback: (...args: Args) => void, delay: number, "
+            "...args: Args): number;"
+        );
+        dts.line("declare function setInterval(callback: () => void, delay?: number): number;");
+        dts.line(
+            "declare function setInterval<Args extends any[]>(callback: (...args: Args) => void, delay: number, "
+            "...args: Args): number;"
+        );
+        dts.line("declare function clearInterval(id: number): void;");
+        dts.line("declare function clearTimeout(id: number): void;");
+
         v8::Isolate* isolate = m_runtime->getIsolate();
         v8::Isolate::Scope isolate_scope(isolate);
         v8::HandleScope scope(isolate);

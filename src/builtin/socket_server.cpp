@@ -245,6 +245,7 @@ namespace tspp {
             m_connections[i]->close();
         }
 
+        m_server->stop_listening();
         m_server->stop();
         m_connections.clear();
 

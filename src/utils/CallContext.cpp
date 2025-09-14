@@ -7,8 +7,8 @@
 namespace tspp {
     CallContext::CallContext(v8::Isolate* isolate, const v8::Local<v8::Context>& context) {
         m_isolate                = isolate;
-        m_context                = context;
         m_nextAllocationOverride = nullptr;
+        m_context.Reset(isolate, context);
     }
 
     CallContext::~CallContext() {
@@ -32,7 +32,7 @@ namespace tspp {
     }
 
     v8::Local<v8::Context> CallContext::getContext() const {
-        return m_context;
+        return m_context.Get(m_isolate);
     }
 
     void CallContext::setNextAllocation(u8* data) {

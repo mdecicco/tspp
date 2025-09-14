@@ -70,6 +70,6 @@ namespace tspp {
             Array<void*> m_callbacks;
             u8* m_nextAllocationOverride;
             v8::Isolate* m_isolate;
-            v8::Local<v8::Context> m_context;
+            v8::Global<v8::Context> m_context;
     };
 }

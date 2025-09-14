@@ -853,16 +853,21 @@ namespace tspp {
                 bind::Function* func = (bind::Function*)property.address.get();
                 emitFunctionDocs(builder, func);
 
+                FunctionUserData& userData   = func->getUserData<FunctionUserData>();
+                FunctionDocumentation* fdocs = userData.documentation;
+                bool isAsync                 = fdocs ? fdocs->isAsync() : false;
+
                 bind::FunctionType* sig    = func->getSignature();
                 bind::DataType* returnType = resolveType(sig->getReturnType());
 
                 String parameters = getArgList(func);
 
                 builder.line(
-                    "%s(%s): %s;",
+                    isAsync ? "%s(%s): Promise<%s%s>;" : "%s(%s): %s%s;",
                     property.name.c_str(),
                     parameters.size() == 0 ? "" : parameters.c_str(),
-                    getTypeName(returnType).c_str()
+                    getTypeName(returnType).c_str(),
+                    fdocs && fdocs->returnIsNullable() ? " | null" : ""
                 );
             }
 
@@ -884,11 +889,16 @@ namespace tspp {
 
                 String parameters = getArgList(func);
 
+                FunctionUserData& userData   = func->getUserData<FunctionUserData>();
+                FunctionDocumentation* fdocs = userData.documentation;
+                bool isAsync                 = fdocs ? fdocs->isAsync() : false;
+
                 builder.line(
-                    "static %s(%s): %s;",
+                    isAsync ? "static %s(%s): Promise<%s%s>;" : "static %s(%s): %s%s;",
                     property.name.c_str(),
                     parameters.size() == 0 ? "" : parameters.c_str(),
-                    getTypeName(returnType).c_str()
+                    getTypeName(returnType).c_str(),
+                    fdocs && fdocs->returnIsNullable() ? " | null" : ""
                 );
             }
 

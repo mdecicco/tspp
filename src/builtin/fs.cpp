@@ -318,11 +318,11 @@ namespace tspp::builtin::fs {
             .desc("Reads data from the file stream")
             .param(0, "offset", "The offset to read from in bytes")
             .param(1, "size", "The size of the data to read in bytes")
-            .returns("The data read from the file stream");
+            .returns("The data read from the file stream", false);
 
         describe(builder.method("status", &BasicFileStream::status))
             .desc("Gets the status of the file stream")
-            .returns("The status of the file stream");
+            .returns("The status of the file stream", false);
     }
 
     void init() {
@@ -338,56 +338,56 @@ namespace tspp::builtin::fs {
         describe(ns->function("existsSync", exists))
             .desc("Synchronously checks if a file or directory exists")
             .param(0, "path", "The path to check")
-            .returns("true if the file or directory exists, false otherwise");
+            .returns("true if the file or directory exists, false otherwise", false);
 
         describe(ns->function("exists", exists))
             .desc("Asynchronously checks if a file or directory exists")
             .param(0, "path", "The path to check")
-            .returns("true if the file or directory exists, false otherwise")
+            .returns("true if the file or directory exists, false otherwise", false)
             .async();
 
         describe(ns->function("statSync", stat))
             .desc("Synchronously gets the status of a file or directory")
             .param(0, "path", "The path to check")
-            .returns("The status of the file or directory");
+            .returns("The status of the file or directory", false);
 
         describe(ns->function("stat", stat))
             .desc("Asynchronously gets the status of a file or directory")
             .param(0, "path", "The path to check")
-            .returns("The status of the file or directory")
+            .returns("The status of the file or directory", false)
             .async();
 
         describe(ns->function("readDirSync", readDir))
             .desc("Synchronously reads the contents of a directory")
             .param(0, "path", "The path to read")
-            .returns("An array of DirEntry objects");
+            .returns("An array of DirEntry objects", false);
 
         describe(ns->function("readDir", readDir))
             .desc("Asynchronously reads the contents of a directory")
             .param(0, "path", "The path to read")
-            .returns("An array of DirEntry objects")
+            .returns("An array of DirEntry objects", false)
             .async();
 
         describe(ns->function("readFileSync", readFile))
             .desc("Synchronously reads the contents of a file")
             .param(0, "path", "The path to read")
-            .returns("The contents of the file as an ArrayBuffer");
+            .returns("The contents of the file as an ArrayBuffer", false);
 
         describe(ns->function("readFile", readFile))
             .desc("Asynchronously reads the contents of a file")
             .param(0, "path", "The path to read")
-            .returns("The contents of the file as an ArrayBuffer")
+            .returns("The contents of the file as an ArrayBuffer", false)
             .async();
 
         describe(ns->function("readFileTextSync", readFileText))
             .desc("Synchronously reads the contents of a file as a UTF-8 string")
             .param(0, "path", "The path to read")
-            .returns("The contents of the file as a UTF-8 string");
+            .returns("The contents of the file as a UTF-8 string", false);
 
         describe(ns->function("readFileText", readFileText))
             .desc("Asynchronously reads the contents of a file as a UTF-8 string")
             .param(0, "path", "The path to read")
-            .returns("The contents of the file as a UTF-8 string")
+            .returns("The contents of the file as a UTF-8 string", false)
             .async();
 
         describe(ns->function("writeFileSync", writeFile))
@@ -426,7 +426,7 @@ namespace tspp::builtin::fs {
         describe(ns->function("openFile", openFile))
             .desc("Opens a file for reading and writing")
             .param(0, "path", "The path to open")
-            .returns("A BasicFileStream object");
+            .returns("A BasicFileStream object", false);
 
         describe(ns->function("closeFile", closeFile))
             .desc("Closes a BasicFileStream")
@@ -435,6 +435,6 @@ namespace tspp::builtin::fs {
         describe(ns->function("realPath", realPath))
             .desc("Gets the canonical pathname of a file or directory")
             .param(0, "path", "The path to get the canonical pathname of")
-            .returns("The canonical pathname of the file or directory");
+            .returns("The canonical pathname of the file or directory", false);
     }
 }

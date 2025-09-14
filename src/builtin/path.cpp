@@ -108,6 +108,10 @@ namespace tspp::builtin::path {
         return std::filesystem::absolute(path.c_str()).string();
     }
 
+    String basename(const String& path) {
+        return std::filesystem::path(path.c_str()).filename().string();
+    }
+
     void init() {
         Namespace* ns = new Namespace("path");
         Registry::Add(ns);
@@ -115,21 +119,26 @@ namespace tspp::builtin::path {
         describe(ns->function("isAbsolute", isAbsolutePath))
             .desc("Checks if a path is an absolute path")
             .param(0, "path", "The path to check")
-            .returns("True if the path is an absolute path, false otherwise");
+            .returns("True if the path is an absolute path, false otherwise", false);
 
         describe(ns->function("normalize", normalize))
             .desc("Normalizes a path")
             .param(0, "path", "The path to normalize")
-            .returns("The normalized path");
+            .returns("The normalized path", false);
 
         describe(ns->function("dirname", dirname))
             .desc("Gets the directory name of a path")
             .param(0, "path", "The path to get the directory name of")
-            .returns("The directory name of the path");
+            .returns("The directory name of the path", false);
 
         describe(ns->function("realPath", realPath))
             .desc("Gets the real path of a path")
             .param(0, "path", "The path to get the real path of")
-            .returns("The real path of the path");
+            .returns("The real path of the path", false);
+
+        describe(ns->function("basename", basename))
+            .desc("Gets the base name of a path")
+            .param(0, "path", "The path to get the base name of")
+            .returns("The base name of the path", false);
     }
 }

@@ -1,7 +1,7 @@
+#include <tspp/bind.h>
 #include <tspp/builtin/databuffer.h>
 #include <tspp/marshalling/DataBufferMarshaller.h>
 #include <tspp/utils/Docs.h>
-#include <tspp/bind.h>
 using namespace bind;
 
 namespace tspp::builtin::databuffer {
@@ -9,7 +9,9 @@ namespace tspp::builtin::databuffer {
         m_size = size;
         m_data = nullptr;
 
-        if (m_size == 0) return;
+        if (m_size == 0) {
+            return;
+        }
         m_data = new u8[size];
     }
 
@@ -22,7 +24,9 @@ namespace tspp::builtin::databuffer {
     }
 
     DataBuffer::~DataBuffer() {
-        if (m_data) delete[] m_data;
+        if (m_data) {
+            delete[] m_data;
+        }
         m_data = nullptr;
         m_size = 0;
     }
@@ -37,12 +41,16 @@ namespace tspp::builtin::databuffer {
 
     String decodeUTF8(const DataBuffer& buffer) {
         u64 sz = buffer.size();
-        if (sz == 0) return "";
+        if (sz == 0) {
+            return "";
+        }
 
         u64 length = sz;
         char* data = (char*)buffer.data();
-        if (data[length - 1] == EOF) length--;
-        
+        if (data[length - 1] == EOF) {
+            length--;
+        }
+
         return String::View(data, length);
     }
 
@@ -57,17 +65,17 @@ namespace tspp::builtin::databuffer {
         describe(builder.ctor<DataBuffer&>())
             .desc("Creates a new DataBuffer by copying another DataBuffer")
             .param(0, "buffer", "The DataBuffer to copy");
-        
+
         builder.dtor();
 
-        DataType* type = builder.getType();
+        DataType* type             = builder.getType();
         DataTypeUserData& userData = type->getUserData<DataTypeUserData>();
-        userData.typescriptType = "ArrayBuffer";
-        userData.marshaller = new DataBufferMarshaller(type);
+        userData.typescriptType    = "ArrayBuffer";
+        userData.marshaller        = new DataBufferMarshaller(type);
 
         describe(ns->function("decodeUTF8", decodeUTF8))
             .desc("Decodes an ArrayBuffer as a UTF-8 string")
             .param(0, "buffer", "The ArrayBuffer to decode")
-            .returns("The decoded UTF-8 string");
+            .returns("The decoded UTF-8 string", false);
     }
 }

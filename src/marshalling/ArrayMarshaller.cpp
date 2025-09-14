@@ -56,7 +56,10 @@ namespace tspp {
         for (u32 i = 0; i < array->size(); i++) {
             void* element = data + (i * elementSize);
 
-            out->Set(context, i, elementMarshaller->toV8(callCtx, element, valueNeedsCopy)).Check();
+            v8::Local<v8::Value> val = elementMarshaller->toV8(callCtx, element, valueNeedsCopy);
+
+            v8::Maybe<bool> result = out->Set(context, i, val);
+            result.Check();
         }
 
         return out;
